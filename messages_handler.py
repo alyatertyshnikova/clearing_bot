@@ -29,22 +29,6 @@ class TeamExpenses:
                     self.team_expenses[debtor][payer] = 0
                 else:
                     self.team_expenses[debtor][payer] = remain
-# with open("team_expenses.yaml", "w") as f:
-#     yaml.dump(team_expenses, f)
-    # with open("team_expenses.yaml", "r") as f:
-    #     team_expenses = yaml.safe_load(f)
-    #     for debtor in debtors:
-    #         if debtor != payer:
-    #             payer_debt = team_expenses[debtor].get(payer, 0)
-    #             remain = payer_debt - debt
-    #             if remain < 0:
-    #                 latest_debtor_debt = team_expenses[payer].get(debtor, 0)
-    #                 team_expenses[payer][debtor] = latest_debtor_debt + abs(remain)
-    #                 team_expenses[debtor][payer] = 0
-    #             else:
-    #                 team_expenses[debtor][payer] = remain
-    # with open("team_expenses.yaml", "w") as f:
-    #     yaml.dump(team_expenses, f)
 
     def get_clearing_result(self) -> str:
         """
