@@ -8,39 +8,30 @@ Sample signature:
 >>> def retry(attempts: int = 3, poll_time: int = 1, exceptions: Tuple[Exception, ...] = (Exception, )) -> Callable:
 ...     ...
 """
-from time import time
-from typing import Callable, Collection
+from time import sleep
+from typing import Callable, Tuple, Type, Any
 
 
-def retry(attempts: int, exceptions: Collection, poll_time: int) -> Callable:
-
+def retry(attempts: int, poll_time: int, exceptions: Tuple[Type[Exception], ...] = (Exception,)) -> Callable:
     def decorator(f: Callable) -> Callable:
-        def wrapped_func(x: int):
-            last_attempt_time = 0
+        def wrapped_func(*args, **kwargs) -> Any:
             current_attempt = 0
+            last_exception = Exception
             while current_attempt < attempts:
-                if time()-last_attempt_time > poll_time:
-                    try:
-                        result = f(x)
-                        return result
-                    except exceptions:
-                        x += 1
-                        current_attempt += 1
-                        last_attempt_time = time()
-            return -1
+                try:
+                    result = f(*args, **kwargs)
+                    return result
+                except exceptions as ex:
+                    last_exception = ex
+                    current_attempt += 1
+                    sleep(poll_time)
+            raise last_exception
 
         return wrapped_func
 
     return decorator
 
 
-@retry(attempts=2, exceptions=(KeyError, ZeroDivisionError), poll_time=5)
-def raise_exception_func(x: int):
-    if x == 1:
-        raise KeyError
-    if x == 2:
-        raise ZeroDivisionError
+@retry(attempts=4, poll_time=5, exceptions=(KeyError, ZeroDivisionError))
+def raise_exception_func(x: int) -> int:
     return x
-
-
-# print(raise_exception_func(3))

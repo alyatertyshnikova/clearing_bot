@@ -2,28 +2,28 @@
 You need to implement a decorator function `cache` that should be applied to some pure function.
 Its goal is to save in cache all the function execution results.
 """
-CACHE = []
+from typing import Callable, Any
+
+CACHE = {}
 
 
-def cache(f):
-    def wrapped_func(x, y):
-        result = f(x, y)
-        CACHE.append(result)
+def cache(f: Callable) -> Callable:
+    def wrapped_func(*args, **kwargs) -> Any:
+        if f.__name__ in CACHE.keys():
+            return CACHE[f.__name__]
+        result = f(*args, **kwargs)
+        CACHE.update({f.__name__: result})
+        return result
 
     return wrapped_func
 
 
 @cache
-def summ(x, y):
+def summ(x: int, y: int) -> int:
     return x + y
 
 
 @cache
-def multiply(x, y):
+def multiply(x: int, y: int) -> int:
     return x * y
 
-
-# summ(1, 4)
-# summ(1, 2)
-# multiply(2, 3)
-# print(CACHE)
