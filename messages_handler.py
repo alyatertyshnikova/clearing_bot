@@ -18,7 +18,11 @@ class TeamExpenses:
         :return:
         """
         _, payer, price, *debtors = message.split()
-        debt = round(int(price)/len(debtors), 2)
+        if payer not in self.team_expenses.keys() or any(debtor not in self.team_expenses.keys() for debtor in debtors):
+            not_team_members = ({payer} | set(debtors)) - self.team_expenses.keys()
+            raise Exception(f"Incorrect names: {not_team_members} is not in the team")
+
+        debt = round(float(price)/len(debtors), 2)
         for debtor in debtors:
             if debtor != payer:
                 payer_debt = self.team_expenses[debtor].get(payer, 0)
