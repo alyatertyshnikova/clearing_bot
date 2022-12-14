@@ -16,7 +16,7 @@ NAMES_COMMAND_REGEX = r"/(\w+)(\s+\w+)+\s*$"
 PAYMENT_COMMAND_REGEX = r"/(\w+\s+){2}\d+(.\d+)?(\s+\w+)+\s*$"
 CLEARING_RESULT_COMMAND_REGEX = r"/\w+\s*$"
 
-TEAMS: dict[TeamExpenses] = dict()
+TEAMS: dict[str, TeamExpenses] = dict()
 
 
 @BOT.message_handler(commands=['start', 'help'])

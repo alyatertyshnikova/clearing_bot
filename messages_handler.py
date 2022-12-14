@@ -1,7 +1,7 @@
 class TeamExpenses:
     def __init__(self, user_id: str):
-        self.user_id = user_id
-        self.team_expenses = {}
+        self._user_id = user_id
+        self._values = {}
 
     def write_names(self, message: str):
         """
@@ -10,7 +10,7 @@ class TeamExpenses:
         """
         names = message.split()[1:]
         for name in names:
-            self.team_expenses.update({name: {}})
+            self._values.update({name: {}})
 
     def write_payment(self, message: str):
         """
@@ -18,27 +18,29 @@ class TeamExpenses:
         :return:
         """
         _, payer, price, *debtors = message.split()
-        if payer not in self.team_expenses.keys() or any(debtor not in self.team_expenses.keys() for debtor in debtors):
-            not_team_members = ({payer} | set(debtors)) - self.team_expenses.keys()
-            raise Exception(f"Incorrect names: {not_team_members} is not in the team")
+        is_debtor_not_in_the_team = any(debtor not in self._values.keys() for debtor in debtors)
+        if payer not in self._values.keys() or is_debtor_not_in_the_team:
+            not_team_members = ({payer} | set(debtors)) - self._values.keys()
+            raise ValueError(f"Incorrect names: {not_team_members} is not in the team")
 
         debt = round(float(price)/len(debtors), 2)
         for debtor in debtors:
-            if debtor != payer:
-                payer_debt = self.team_expenses[debtor].get(payer, 0)
-                remain = payer_debt - debt
-                if remain < 0:
-                    latest_debtor_debt = self.team_expenses[payer].get(debtor, 0)
-                    self.team_expenses[payer][debtor] = latest_debtor_debt + abs(remain)
-                    self.team_expenses[debtor][payer] = 0
-                else:
-                    self.team_expenses[debtor][payer] = remain
+            if debtor == payer:
+                continue
+            payer_debt = self._values[debtor].get(payer, 0)
+            remain = payer_debt - debt
+            if remain < 0:
+                latest_debtor_debt = self._values[payer].get(debtor, 0)
+                self._values[payer][debtor] = latest_debtor_debt + abs(remain)
+                self._values[debtor][payer] = 0
+            else:
+                self._values[debtor][payer] = remain
 
     def get_clearing_result(self) -> str:
         """
         :return: Clearing result
         """
         result = ""
-        for payer, debts in self.team_expenses.items():
+        for payer, debts in self._values.items():
             result += f"To {payer}\n {debts}\n"
         return result
